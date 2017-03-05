@@ -1,6 +1,6 @@
 [submodule "TooBasic"]
 	path = TooBasic
-	url = git@github.com:SjonHortensius/TooBasic.git
+	url = https://github.com/SjonHortensius/TooBasic.git
 [submodule "TooBasic-Rpc"]
 	path = TooBasic-Rpc
-	url = git@github.com:SjonHortensius/TooBasic-Rpc.git
+	url = https://github.com/SjonHortensius/TooBasic-Rpc.git
