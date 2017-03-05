@@ -6,7 +6,7 @@
 		</tr>
 	</thead>
 	<tbody>
-<?foreach ($this->list as $i => $t):?>
+<?foreach ($this->list as $h => $t):?>
 		<tr>
 			<td>
 				<?=$t->name?>
@@ -17,16 +17,15 @@
 				</div>
 
 				<ul class="actions">
-<?if($t->state == 'pause'):?>
-					<li><a class="btn btn-sm btn-info" href="?resume/<?=$i?>">resume</a></li>
+<?if (!$t->is_open):?>
+					<li><a class="btn btn-sm btn-primary" href="?start/<?=$h?>">start</a></li>
 <?else:?>
-					<li><a class="btn btn-sm btn-warning" href="?pause/<?=$i?>">pause</a></li>
-<?endif?>
-
-<?if($t->state == 'stop'):?>
-					<li><a class="btn btn-sm btn-primary" href="?start/<?=$i?>">start</a></li>
-<?else:?>
-					<li><a class="btn btn-sm btn-danger" href="?remove/<?=$i?>">remove</a></li>
+	<?if ($t->is_open && (!$t->is_active || !$t->state)):?>
+					<li><a class="btn btn-sm btn-warning" href="?pause/<?=$h?>">pause</a></li>
+	<?elseif (!$t->state):?>
+					<li><a class="btn btn-sm btn-info" href="?resume/<?=$h?>">resume</a></li>
+	<?endif?>
+					<li><a class="btn btn-sm btn-danger" href="?remove/<?=$h?>">remove</a></li>
 <?endif?>
 				</ul>
 			</td>

@@ -9,11 +9,14 @@ spl_autoload_register(function($class){
 		require('TooBasic/' . substr($class, strlen('TooBasic/')) .'.php');
 });
 
-class webRTorrent extends TooBasic\Controller
+class WebRTorrent extends TooBasic\Controller
 {
 	public static $client;
 	public static $tpl;
 	protected $_config;
+	protected static $torrentProperties = ['hash', 'name', 'size_bytes', 'bytes_done', 'state', 'creation_date',
+		'peers_connected', 'is_active', 'is_private', 'is_open'
+	];
 
 	protected function _construct()
 	{
@@ -41,7 +44,7 @@ class webRTorrent extends TooBasic\Controller
 		$hash = substr($parts['xt'], strlen('urn:btih:'));
 
 		if (32 == strlen($hash))
-			$hash = self::decodeBase32($hash);
+			$hash = self::_decodeBase32($hash);
 
 		if (40 != strlen($hash))
 			throw new Exception('Invalid hash in magnet link');
@@ -69,26 +72,25 @@ class webRTorrent extends TooBasic\Controller
 
 	public function getIndex()
 	{
+		$args = ['main'];
+		foreach (self::$torrentProperties as $p)
+			array_push($args, "d.{$p}=");
+
 		self::$tpl->list = [];
-		foreach (self::$client->download_list() as $hash)
-			self::$tpl->list[$hash] = (object)[
-				'name' => self::$client->d->name($hash),
-				'size_bytes' => self::$client->d->size_bytes($hash),
-				'bytes_done' => self::$client->d->bytes_done($hash),
-				'state' => '',
-			];
+		foreach (call_user_func_array([self::$client->d, 'multicall'], $args) as $t)
+			self::$tpl->list[$t[0]] = (object)array_combine(self::$torrentProperties, $t);
 
 		print self::$tpl->get('index')->getWrapped();
 	}
 
-	public static function decodeBase32($str)
+	protected static function _decodeBase32($str)
 	{
-        $buffer = 0;
-        $left = 0;
-        $output = '';
+		$buffer = 0;
+		$left = 0;
+		$output = '';
 
 		foreach (str_split(strtoupper($str)) as $c)
-        {
+		{
 			$val = strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=', $c);
 
 			if (false === $val)
@@ -109,7 +111,7 @@ class webRTorrent extends TooBasic\Controller
 		{
 			$buffer <<= 5;
 			$output .= chr(($buffer >> ($left - 3)) & 0xFF);
-        }
+		}
 
 		return strtoupper(bin2hex($output));
 	}
@@ -126,4 +128,4 @@ class webRTorrent extends TooBasic\Controller
 	}
 }
 
-webRTorrent::dispatch('/'. $_SERVER['QUERY_STRING']);
+WebRTorrent::dispatch('/'. $_SERVER['QUERY_STRING']);
