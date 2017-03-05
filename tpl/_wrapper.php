@@ -4,8 +4,8 @@
 		<title>webRTorrent</title>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<link href="htdocs/bootstrap.min.css" rel="stylesheet">
-		<link href="htdocs/dashboard.css" rel="stylesheet">
+		<link href="static/bootstrap.min.css" rel="stylesheet">
+		<link href="static/dashboard.css" rel="stylesheet">
 	</head>
 
 	<body>
