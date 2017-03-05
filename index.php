@@ -15,7 +15,7 @@ class WebRTorrent extends TooBasic\Controller
 	public static $tpl;
 	protected $_config;
 	protected static $torrentProperties = ['hash', 'name', 'size_bytes', 'bytes_done', 'state', 'creation_date',
-		'peers_connected', 'is_active', 'is_private', 'is_open'
+		'peers_connected', 'is_active', 'is_private', 'is_open', 'left_bytes'
 	];
 
 	protected function _construct()
@@ -30,7 +30,20 @@ class WebRTorrent extends TooBasic\Controller
 
 		self::$tpl = new TooBasic\Template;
 
-		$this->_config['siteRoot'] = rtrim('/', $this->_config['siteRoot']).'/';
+		$this->_config['siteRoot'] = rtrim($this->_config['siteRoot'], '/').'/';
+	}
+
+	public function getIndex()
+	{
+		$args = ['main'];
+		foreach (self::$torrentProperties as $p)
+			array_push($args, "d.{$p}=");
+
+		self::$tpl->list = [];
+		foreach (call_user_func_array([self::$client->d, 'multicall'], $args) as $t)
+			self::$tpl->list[$t[0]] = (object)array_combine(self::$torrentProperties, $t);
+
+		print self::$tpl->get('index')->getWrapped();
 	}
 
 	public function postAdd()
@@ -54,9 +67,29 @@ class WebRTorrent extends TooBasic\Controller
 		header('Location: '. $this->_config['siteRoot']);
 	}
 
-	public function getTest()
+	public function postToggle($hash)
 	{
-		print self::$tpl->get('test')->getWrapped();
+		if (!isset($_POST['state']))
+			throw new TooBasic\Exception('Missing parameter: `%s`', ['state'], 400);
+
+		switch ($_POST['state'])
+		{
+			case 'pause':
+				self::$client->d->stop($hash);
+			break;
+
+			case 'start':
+				self::$client->d->open($hash);
+			case 'resume':
+				self::$client->d->start($hash);
+			break;
+
+			case 'remove':
+				self::$client->d->erase($hash);
+			break;
+		}
+
+		header('Location: '. $this->_config['siteRoot']);
 	}
 
 	protected function _handle(TooBasic\Exception $e)
@@ -68,19 +101,6 @@ class WebRTorrent extends TooBasic\Controller
 		}
 
 		echo str_replace(dirname(__DIR__), '.', $e);
-	}
-
-	public function getIndex()
-	{
-		$args = ['main'];
-		foreach (self::$torrentProperties as $p)
-			array_push($args, "d.{$p}=");
-
-		self::$tpl->list = [];
-		foreach (call_user_func_array([self::$client->d, 'multicall'], $args) as $t)
-			self::$tpl->list[$t[0]] = (object)array_combine(self::$torrentProperties, $t);
-
-		print self::$tpl->get('index')->getWrapped();
 	}
 
 	protected static function _decodeBase32($str)

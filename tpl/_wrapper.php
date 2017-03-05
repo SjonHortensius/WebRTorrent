@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>webRTorrent</title>
+		<title>WebRTorrent</title>
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link href="static/bootstrap.min.css" rel="stylesheet">
@@ -22,10 +22,8 @@
 		</nav>
 
 		<div class="container-fluid">
-			<div class="row">
-				<main>
+			<main>
 <?=$this->content?>
-				</main>
-			</div>
+			</main>
 		</div>
 </html>

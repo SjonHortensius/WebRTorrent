@@ -1,16 +1,39 @@
-ul.actions
+body
 {
-	list-style: none;
+	padding-top: 3.25rem;
+}
+
+.container-fluid
+{
 	padding: 0;
-	margin-top: 0.5em;
 }
 
-ul.actions li
+.row .col-10
 {
-	float: left;
+	padding: 0 0 0 0.25em;
+
+	text-overflow: ellipsis;
+	/* Required for text-overflow to do anything */
+	white-space: nowrap;
+	overflow: hidden;
 }
 
-ul.actions li:not(:first-child)
+.row
 {
-	margin-left: 1em;
+	padding-bottom: 0.75rem;
+}
+
+.row:nth-child(odd)
+{
+	background-color: #dcdcdc;
+}
+
+main form
+{
+	margin-top: 0.5rem;
+}
+
+button
+{
+	cursor: pointer;
 }
