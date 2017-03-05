@@ -15,9 +15,23 @@ class webRTorrent extends TooBasic\Controller
 
 	public function postAdd()
 	{
-		self::$client->add();
+		$url = parse_url($_POST['magnet']);
+		if (!$url || 'magnet' != $url['scheme'])
+			throw new Exception('Could not parse magnet link');
 
-		print self::$tpl->get('add')->getWrapped();
+		parse_str($url['query'], $parts);
+
+		$hash = substr($parts['xt'], strlen('urn:btih:'));
+
+		if (32 == strlen($hash))
+			$hash = self::decodeBase32($hash);
+
+		if (strlen($hash) != 40)
+			throw new Exception('Invalid hash in magnet link');
+
+		self::$client->load_start($_POST['magnet']);
+
+		header('Location: /');
 	}
 
 	public function getTest()
@@ -47,7 +61,38 @@ class webRTorrent extends TooBasic\Controller
 			];
 
 		print self::$tpl->get('index')->getWrapped();
-die;
-		print_r(self::$client->system->listMethods());
+	}
+
+	public static function decodeBase32($str)
+	{
+        $buffer = 0;
+        $left = 0;
+        $output = '';
+
+		foreach (str_split(strtoupper($str)) as $c)
+        {
+			$val = strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=', $c);
+
+			if (false === $val)
+				throw new Exception('Unexpected character in input: '. $c);
+
+			$buffer <<= 5;
+			$buffer |= $val;
+			$left += 5;
+
+			if ($left >= 8)
+			{
+				$output .= chr(($buffer >> ($left - 8)) & 0xFF);
+				$left -= 8;
+			}
+		}
+
+		if ($left > 0)
+		{
+			$buffer <<= 5;
+			$output .= chr(($buffer >> ($left - 3)) & 0xFF);
+        }
+
+		return strtoupper(bin2hex($output));
 	}
 }

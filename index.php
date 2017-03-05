@@ -14,4 +14,4 @@ spl_autoload_register(function($class){
 		require(__DIR__ .'/library/'. $class .'.php');
 });
 
-webRTorrent::dispatch(substr($_SERVER['REQUEST_URI'], strlen('/'.__DIR__)));
+webRTorrent::dispatch('/'. (isset($_GET['action']) ? $_GET['action'] : ''));

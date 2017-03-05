@@ -37,6 +37,11 @@
 		<div class="container-fluid">
 			<div class="row">
 				<nav class="col-sm-3 col-md-2 hidden-xs-down bg-faded sidebar">
+					<form class="form-inline mt-2 mt-md-0" action="?action=add" method="post">
+						<input class="form-control mr-sm-2" type="text" placeholder="Magnet" name="magnet" pattern="magnet:\?xt=urn:btih:[a-zA-Z0-9]{32,40}&.*">
+						<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Add</button>
+					</form>
+
 					<ul class="nav nav-pills flex-column">
 						<li class="nav-item">
 							<a class="nav-link active" href="#">Main<span class="sr-only">(current)</span></a>
