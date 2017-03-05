@@ -13,13 +13,21 @@ class webRTorrent extends TooBasic\Controller
 {
 	public static $client;
 	public static $tpl;
+	protected $_config;
 
 	protected function _construct()
 	{
+		header('Content-Type: text/html; charset=utf-8');
+
+		require('config.php');
+		$this->_config = $config;
+
 		$scgi = new TooBasic\Rpc\Transport\Scgi(new TooBasic\Rpc\Transport\Socket);
-		self::$client = new TooBasic\Rpc\Client\Xml('raw://localhost:5000/RPC2', $scgi);
+		self::$client = new TooBasic\Rpc\Client\Xml('raw://'.$this->_config['rtorrentRpc'].'/RPC2', $scgi);
 
 		self::$tpl = new TooBasic\Template;
+
+		$this->_config['siteRoot'] = rtrim('/', $this->_config['siteRoot']).'/';
 	}
 
 	public function postAdd()
@@ -35,12 +43,12 @@ class webRTorrent extends TooBasic\Controller
 		if (32 == strlen($hash))
 			$hash = self::decodeBase32($hash);
 
-		if (strlen($hash) != 40)
+		if (40 != strlen($hash))
 			throw new Exception('Invalid hash in magnet link');
 
 		self::$client->load_start($_POST['magnet']);
 
-		header('Location: /');
+		header('Location: '. $this->_config['siteRoot']);
 	}
 
 	public function getTest()
@@ -66,7 +74,8 @@ class webRTorrent extends TooBasic\Controller
 			self::$tpl->list[$hash] = (object)[
 				'name' => self::$client->d->name($hash),
 				'size_bytes' => self::$client->d->size_bytes($hash),
-				'bytes_done' => self::$client->d->bytes_done($hash)
+				'bytes_done' => self::$client->d->bytes_done($hash),
+				'state' => '',
 			];
 
 		print self::$tpl->get('index')->getWrapped();
@@ -104,6 +113,17 @@ class webRTorrent extends TooBasic\Controller
 
 		return strtoupper(bin2hex($output));
 	}
+
+	public static function binaryPrefix($size, $precision = 0, $format = '%.2f %sb')
+	{
+		$prefixes = array('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y');
+		$prefix = NULL;
+
+		while ($size >= 1024 && $prefix = array_shift($prefixes))
+			$size = round($size/1024, $precision);
+
+		return sprintf($format, $size, $prefix);
+	}
 }
 
-webRTorrent::dispatch('/'. (isset($_GET['action']) ? $_GET['action'] : ''));
+webRTorrent::dispatch('/'. $_SERVER['QUERY_STRING']);
