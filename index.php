@@ -18,7 +18,7 @@ class WebRTorrent extends TooBasic\Controller
 		'peers_connected', 'is_active', 'is_private', 'is_open', 'left_bytes'
 	];
 
-	protected function _construct()
+	protected function _construct(string $method, string $action, array $params)
 	{
 		header('Content-Type: text/html; charset=utf-8');
 
@@ -35,12 +35,12 @@ class WebRTorrent extends TooBasic\Controller
 
 	public function getIndex()
 	{
-		$args = ['main'];
+		$args = ['', 'main'];
 		foreach (self::$torrentProperties as $p)
 			array_push($args, "d.{$p}=");
 
 		self::$tpl->list = [];
-		foreach (call_user_func_array([self::$client->d, 'multicall'], $args) as $t)
+		foreach (call_user_func_array([self::$client->d, 'multicall2'], $args) as $t)
 			self::$tpl->list[$t[0]] = (object)array_combine(self::$torrentProperties, $t);
 
 		print self::$tpl->get('index')->getWrapped();
@@ -62,7 +62,7 @@ class WebRTorrent extends TooBasic\Controller
 		if (40 != strlen($hash))
 			throw new Exception('Invalid hash in magnet link');
 
-		self::$client->load_start($_POST['magnet']);
+		self::$client->{'load.start'}('', $_POST['magnet']);
 
 		header('Location: '. $this->_config['siteRoot']);
 	}
@@ -92,7 +92,7 @@ class WebRTorrent extends TooBasic\Controller
 		header('Location: '. $this->_config['siteRoot']);
 	}
 
-	protected function _handle(TooBasic\Exception $e)
+	protected function _handle(Exception $e)
 	{
 		if (!headers_sent())
 		{

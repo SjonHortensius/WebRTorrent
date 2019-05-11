@@ -9,7 +9,7 @@ Instructions
 Install rtorrent and run it (for example) in a screen. Enable `scgi` by making sure this is in your `.rtorrent.rc`:
 
 ```
- scgi_port = localhost:5000
+ network.scgi.open_port = "127.0.0.1:5000"
 ```
 
 Clone this repository, and copy `config.sample.php` to `config.php`, customize it if needed:
